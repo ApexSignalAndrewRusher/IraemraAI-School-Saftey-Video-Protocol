@@ -1,0 +1,23 @@
+name: Verify IRAEMRA prototype
+on:
+  pull_request:
+  push:
+permissions:
+  contents: read
+jobs:
+  checks:
+    runs-on: ubuntu-24.04
+    defaults:
+      run:
+        working-directory: IraemraAI School Safety Video Protocol
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund --ignore-scripts
+      - name: Check deterministic tests
+        run: npm test
+      - name: Typecheck and build
+        run: npm run build
