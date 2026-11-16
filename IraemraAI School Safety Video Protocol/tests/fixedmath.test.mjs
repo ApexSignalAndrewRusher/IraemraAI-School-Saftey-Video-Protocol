@@ -24,7 +24,9 @@ test('demo and crypto implementation never claim verified chain of custody',()=>
   const crypto=readFileSync(new URL('../src/rosettastone.ts',import.meta.url),'utf8');
   assert.doesNotMatch(main,/District-ready|Admissible|chain-of-custody achieved/i);
   assert.match(main,/No safety response, video evidence, signed override/);
-  assert.match(proto,/crypto\.subtle\.digest\('SHA-256'/);
+  assert.match(proto,/digestDemoNonce\(epo\.demo_nonce\)/);
+  const replay=readFileSync(new URL('../src/replay.ts',import.meta.url),'utf8');
+  assert.match(replay,/crypto\.subtle\.digest\('SHA-256'/);
   assert.doesNotMatch(crypto,/digestSync/);
 });
 

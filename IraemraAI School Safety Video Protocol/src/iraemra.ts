@@ -2,6 +2,7 @@
 import { PersistentStore } from './persistence';
 import { OverrideValidator } from './validator';
 import { ComplianceMonitor } from './compliance';
+import { digestDemoNonce } from './replay';
 
 export type DemoEPO = { demo_nonce: Uint8Array };
 export type DemoPIR = { demo_digest: Uint8Array };
@@ -29,9 +30,6 @@ export class IraemraProtocol {
   async demoClosePIR(epo: DemoEPO): Promise<DemoPIR> {
     if (!this.initialized) throw new Error('Initialize the demo first');
     // A single SHA-256 digest is not a Merkle tree or custody verification.
-    const bytes = new Uint8Array(epo.demo_nonce.byteLength);
-    bytes.set(epo.demo_nonce);
-    const digest = await crypto.subtle.digest('SHA-256', bytes.buffer);
-    return { demo_digest: new Uint8Array(digest) };
+    return { demo_digest: await digestDemoNonce(epo.demo_nonce) };
   }
 }

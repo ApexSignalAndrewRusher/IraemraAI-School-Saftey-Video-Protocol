@@ -26,3 +26,14 @@ The implementation still lacks verified authorization, signature checks, nonce p
 ## Licensing note for the maintainer
 
 The root README and `LICENSE.txt` contain placeholders in place of the full MIT text plus a separate determinism clause. **No licence changes are made in this patch.** Please clarify the intended licence and any additional requirements before encouraging redistribution or deployment.
+
+## QSOL-IMC integration — finite, replayable demonstrations
+
+The following adaptation uses methods rather than importing unrelated software:
+
+- **OPT contract:** `QSOLKCB/OPT/AGENTS.md` asks for a named invariant and reference/conformance checks before optimisation. The replay invariant here is **the exact 32-byte nonce supplied to SHA-256**, with deterministic output comparison. The user can rerun the same session input without generating new random bytes.
+- **VANILLAJS precedent:** `QSOLKCB/VANILLAJS/AGENTS.md` separates pure modules from browser/UI state and requires explicit test scope. `src/replay.ts` has no DOM or storage dependency and is tested directly by Node.
+- **Not ported:** VANILLAJS's checked Q16.16 module is deliberately **not** imported because the existing app stores microsecond durations and six-decimal scores in `bigint`, a different representation. There is no sound equivalence justification for a Q16.16 substitution here.
+- **No security inference:** SHA-256 repeatability demonstrates that the same bytes produce the same hash on the tested implementation; it does not authenticate sources, sign records, verify evidence, implement actual emergency handling or provide immutable custody.
+
+The previous demo still has no production safety authorization. The new Replay button retains a transient in-memory nonce and digest only; no local storage or external service is used for replay.

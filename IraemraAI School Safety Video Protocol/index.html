@@ -4,12 +4,17 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>IRAEMRA v1.8.1 — prototype demonstration</title>
+  <link rel="stylesheet" href="./src/demo.css" />
 </head>
 <body>
   <main id="app">
     <h1>IRAEMRA v1.8.1 — Prototype Demo</h1>
     <p role="note"><strong>SIMULATION ONLY.</strong> No live emergency response, evidence video, authorization, chain of custody or safety decision occurs in this browser demo.</p>
-    <button id="demo-btn" type="button">Run simulated nonce and SHA-256 digest</button>
+    <div class="actions">
+      <button id="demo-btn" type="button">Run simulated nonce and SHA-256 digest</button>
+      <button id="replay-btn" type="button" disabled>Replay same input</button>
+    </div>
+    <p class="scope">Deterministic replay of bytes only. No emergency authorization, signatures, recording or custody proof.</p>
     <pre id="log" aria-live="polite"></pre>
   </main>
   <script type="module" src="./src/main.ts"></script>
