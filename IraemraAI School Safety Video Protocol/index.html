@@ -2,17 +2,16 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <link rel="icon" type="image/svg+xml" href="/favicon.ico" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>IRAEMRA v1.8.1 – NEO-NUCLEUS HARDENED</title>
+  <title>IRAEMRA v1.8.1 — prototype demonstration</title>
 </head>
 <body>
-  <div id="app">
-    <h1>IRAEMRA v1.8.1 – NEO-NUCLEUS HARDENED</h1>
-    <p>Privacy-first school safety override protocol</p>
-    <button id="demo-btn">Run Live Demo: Trigger EPO → PIR</button>
-    <pre id="log"></pre>
-  </div>
-  <script type="module" src="/src/main.ts"></script>
+  <main id="app">
+    <h1>IRAEMRA v1.8.1 — Prototype Demo</h1>
+    <p role="note"><strong>SIMULATION ONLY.</strong> No live emergency response, evidence video, authorization, chain of custody or safety decision occurs in this browser demo.</p>
+    <button id="demo-btn" type="button">Run simulated nonce and SHA-256 digest</button>
+    <pre id="log" aria-live="polite"></pre>
+  </main>
+  <script type="module" src="./src/main.ts"></script>
 </body>
 </html>
