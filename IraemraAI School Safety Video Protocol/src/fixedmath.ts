@@ -1,14 +1,17 @@
-// fixedmath.ts - Core Deterministic Math (No Floats)
+// fixedmath.ts - BigInt core with explicitly numeric time/score input boundaries
 export type TickCount = bigint;
 export type FixedN = bigint;
 
 export class FixedMath {
   static now(): TickCount {
-    return BigInt(Math.floor(performance.now() * 1_000_000));
+    // performance.now() is milliseconds; multiply by 1,000 for microseconds.
+    // The previous 1,000,000 conversion made rate windows 1,000x too short.
+    return BigInt(Math.floor(performance.now() * 1_000));
   }
 
   static fromNumber(x: number): FixedN {
-    return BigInt(Math.floor(x * 1_000_000)); // µs scale for time/score
+    if (!Number.isFinite(x)) throw new RangeError('FixedMath input must be finite');
+    return BigInt(Math.floor(x * 1_000_000)); // Explicit numeric boundary
   }
 
   static add(a: FixedN, b: FixedN): FixedN { return a + b; }

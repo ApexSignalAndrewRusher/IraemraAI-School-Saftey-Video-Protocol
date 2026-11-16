@@ -1,24 +1,26 @@
-// validator.ts - OverrideValidator + RateLimiter
-import { FixedMath } from './fixedmath';
-import { RosettaStone } from './rosettastone';
-import { PersistentStore } from './persistence';
+// OverrideValidator — authentication is NOT implemented in this demo.
+import { FixedMath } from './fixedmath.ts';
+import type { FixedN, TickCount } from './fixedmath.ts';
+import { RosettaStone } from './rosettastone.ts';
+import type { PublicKey } from './rosettastone.ts';
+import { PersistentStore } from './persistence.ts';
 
 export class RateLimiter {
   private globalAttempts: TickCount[] = [];
   private readonly GLOBAL_MAX = 50;
-  private readonly WINDOW = 60_000_000n;
+  private readonly WINDOW = 60_000_000n; // microseconds: 60 seconds
   private lockdownUntil: TickCount = 0n;
 
-  constructor(private fixed: typeof FixedMath) {}
+  private readonly fixed: typeof FixedMath;
+  constructor(fixed: typeof FixedMath) { this.fixed=fixed; }
 
   isAllowed(): boolean {
     const now = this.fixed.now();
     if (now < this.lockdownUntil) return false;
-
     this.globalAttempts = this.globalAttempts.filter(t => now - t < this.WINDOW);
     if (this.globalAttempts.length >= this.GLOBAL_MAX) {
-      this.lockdownUntil = now + 600_000_000n;
-      console.error('🚨 GLOBAL LOCKDOWN');
+      this.lockdownUntil = now + 600_000_000n; // 10 minutes
+      console.error('GLOBAL LOCKDOWN (DEMO)');
       return false;
     }
     this.globalAttempts.push(now);
@@ -27,35 +29,28 @@ export class RateLimiter {
 }
 
 export class OverrideValidator {
-  private rosetta: RosettaStone;
-  private store: PersistentStore;
-  private rateLimiter: RateLimiter;
-  private authorizedKeys: Set<string>;
-  private usedNonces = new Map<FixedN, TickCount>();
-  private readonly NONCE_TTL = 600_000_000n;
+  private readonly rosetta: RosettaStone;
+  private readonly authorizedKeys: Set<string>;
 
   constructor(store: PersistentStore, authorizedKeys: PublicKey[]) {
-    this.store = store;
     this.rosetta = new RosettaStone(store);
-    this.rateLimiter = new RateLimiter(FixedMath);
-    this.authorizedKeys = new Set(authorizedKeys.map(k => this.toHex(k)));
+    this.authorizedKeys = new Set(authorizedKeys.map(key => this.toHex(key)));
   }
 
-  async init(): Promise<void> {
-    await this.rosetta.init();
+  async init(): Promise<void> { await this.rosetta.init(); }
+
+  isAuthorizedKey(key: PublicKey): boolean {
+    return this.authorizedKeys.has(this.toHex(key));
   }
 
-  private cleanupNonces(): void {
-    const now = FixedMath.now();
-    for (const [n, t] of this.usedNonces) {
-      if (now - t > this.NONCE_TTL) this.usedNonces.delete(n);
-    }
+  // A complete override authorization implementation is absent upstream.
+  // Do not silently accept or issue overrides until policy, signatures,
+  // replay protection and independent verification are implemented and tested.
+  attemptOverride(_nonce: FixedN): never {
+    throw new Error('Override authorization NOT IMPLEMENTED: prototype only');
   }
-
-  // Full attemptOverride with all fixes (signature verify, secondary, etc.)
-  // ... (as in final v1.8.1 code)
 
   private toHex(bytes: Uint8Array): string {
-    return Array.from(bytes).map(b => b.toString(16).padStart(2, '0')).join('');
+    return Array.from(bytes, b => b.toString(16).padStart(2, '0')).join('');
   }
 }

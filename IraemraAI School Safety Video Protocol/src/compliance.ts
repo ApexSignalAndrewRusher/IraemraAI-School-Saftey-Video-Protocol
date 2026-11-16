@@ -1,17 +1,25 @@
 // compliance.ts - SLA Monitor
-import { PersistentStore } from './persistence';
-import { FixedMath } from './fixedmath';
+import type { PersistentStore } from './persistence.ts';
 
 export class ComplianceMonitor {
   private store: PersistentStore;
   private readonly MAX_UNREVIEWED = 10;
+  private timer: ReturnType<typeof setInterval> | null = null;
 
   constructor(store: PersistentStore) {
     this.store = store;
   }
 
   start(): void {
-    setInterval(() => this.enforceSLA(), 60_000);
+    if (this.timer !== null) return; // Repeated demo clicks cannot multiply monitors.
+    this.timer = setInterval(() => {
+      void this.enforceSLA().catch(error => console.error('Demo compliance monitor failed:', error));
+    }, 60_000);
+  }
+
+  stop(): void {
+    if (this.timer !== null) clearInterval(this.timer);
+    this.timer = null;
   }
 
   async enforceSLA(): Promise<void> {
