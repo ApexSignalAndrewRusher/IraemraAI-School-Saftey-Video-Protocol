@@ -11,7 +11,10 @@ export function copyDemoNonce(input: Uint8Array): Uint8Array {
 
 export async function digestDemoNonce(input: Uint8Array): Promise<Uint8Array> {
   const copy = copyDemoNonce(input);
-  const digest = await crypto.subtle.digest('SHA-256', copy.buffer);
+  // Use an explicitly owned ArrayBuffer; strict DOM typings reject ArrayBufferLike.
+  const owned = new ArrayBuffer(copy.byteLength);
+  new Uint8Array(owned).set(copy);
+  const digest = await crypto.subtle.digest('SHA-256', owned);
   return new Uint8Array(digest);
 }
 
