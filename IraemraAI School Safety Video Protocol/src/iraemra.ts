@@ -8,17 +8,32 @@ export type DemoEPO = { demo_nonce: Uint8Array };
 export type DemoPIR = { demo_digest: Uint8Array };
 
 export class IraemraProtocol {
-  private readonly store = new PersistentStore();
-  private readonly validator = new OverrideValidator(this.store, []);
-  private readonly monitor = new ComplianceMonitor(this.store);
+  private readonly store: PersistentStore;
+  private readonly validator: OverrideValidator;
+  private readonly monitor: ComplianceMonitor;
   private initialized = false;
+  private initializing: Promise<void> | null = null;
+
+  constructor(store: PersistentStore = new PersistentStore(), monitor?: ComplianceMonitor) {
+    this.store = store;
+    this.validator = new OverrideValidator(store, []);
+    this.monitor = monitor ?? new ComplianceMonitor(store);
+  }
 
   async init(): Promise<void> {
     if (this.initialized) return;
-    await this.store.init();
-    await this.validator.init();
-    this.initialized = true;
-    this.monitor.start();
+    if (this.initializing) return this.initializing;
+    this.initializing = (async () => {
+      await this.store.init();
+      await this.validator.init();
+      this.monitor.start();
+      this.initialized = true;
+    })();
+    try { await this.initializing; }
+    catch (error) {
+      this.initializing = null;
+      throw error;
+    }
   }
 
   async demoEmergencyOverride(): Promise<DemoEPO> {

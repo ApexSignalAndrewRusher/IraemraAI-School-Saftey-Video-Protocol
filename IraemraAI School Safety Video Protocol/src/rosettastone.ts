@@ -26,14 +26,8 @@ export class RosettaStone {
       throw new Error('CRITICAL: Insecure cryptographic context');
     }
 
-    let salt = await this.store.get('system', 'install_salt');
-    if (!salt) {
-      salt = crypto.getRandomValues(new Uint8Array(32));
-      await this.store.set('system', 'install_salt', Array.from(salt));
-    } else if (Array.isArray(salt)) {
-      salt = new Uint8Array(salt);
-    }
-    this.installSalt = salt;
+    // Serialized cross-tab readwrite transaction; all instances use winning salt.
+    this.installSalt = await this.store.getOrCreateInstallSalt();
   }
 
   async hashBytes(data: Uint8Array): Promise<Hash32> {
