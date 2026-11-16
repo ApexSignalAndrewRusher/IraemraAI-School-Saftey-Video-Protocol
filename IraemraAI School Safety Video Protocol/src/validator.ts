@@ -1,9 +1,9 @@
 // OverrideValidator — authentication is NOT implemented in this demo.
-import { FixedMath } from './fixedmath';
-import type { FixedN, TickCount } from './fixedmath';
-import { RosettaStone } from './rosettastone';
-import type { PublicKey } from './rosettastone';
-import { PersistentStore } from './persistence';
+import { FixedMath } from './fixedmath.ts';
+import type { FixedN, TickCount } from './fixedmath.ts';
+import { RosettaStone } from './rosettastone.ts';
+import type { PublicKey } from './rosettastone.ts';
+import { PersistentStore } from './persistence.ts';
 
 export class RateLimiter {
   private globalAttempts: TickCount[] = [];
@@ -11,7 +11,8 @@ export class RateLimiter {
   private readonly WINDOW = 60_000_000n; // microseconds: 60 seconds
   private lockdownUntil: TickCount = 0n;
 
-  constructor(private fixed: typeof FixedMath) {}
+  private readonly fixed: typeof FixedMath;
+  constructor(fixed: typeof FixedMath) { this.fixed=fixed; }
 
   isAllowed(): boolean {
     const now = this.fixed.now();

@@ -1,5 +1,5 @@
 // compliance.ts - SLA Monitor
-import { PersistentStore } from './persistence';
+import type { PersistentStore } from './persistence.ts';
 
 export class ComplianceMonitor {
   private store: PersistentStore;

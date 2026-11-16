@@ -18,6 +18,42 @@ export class PersistentStore {
     }
   }
 
+  /**
+   * Cross-tab atomic install salt initialization.
+   * The IndexedDB read and conditional write occur in one READWRITE transaction:
+   * IndexedDB serializes conflicting readwrite transactions on 'system'.
+   * Do not use localStorage fallback here because it has no atomic get-or-set.
+   */
+  async getOrCreateInstallSalt(): Promise<Uint8Array> {
+    const db=this.db;
+    if (!db) throw new Error('Atomic install salt requires IndexedDB; refusing unsafe fallback');
+    if (typeof crypto==='undefined' || typeof crypto.getRandomValues!=='function')
+      throw new Error('Secure random source unavailable');
+    return new Promise((resolve,reject)=>{
+      const tx=db.transaction('system','readwrite');
+      const store=tx.objectStore('system');
+      const request=store.get('install_salt');
+      let salt: Uint8Array | null = null;
+      request.onsuccess=()=>{
+        const old=request.result;
+        if (old===undefined) {
+          salt=crypto.getRandomValues(new Uint8Array(32));
+          store.put(Array.from(salt),'install_salt');
+        } else if (Array.isArray(old) && old.length===32 &&
+                   old.every((v:unknown)=>Number.isInteger(v) &&
+                     (v as number)>=0 && (v as number)<=255)) {
+          salt=Uint8Array.from(old);
+        } else {
+          tx.abort(); // Invalid stored salt must never be silently replaced.
+        }
+      };
+      request.onerror=()=>tx.abort();
+      tx.oncomplete=()=>salt?resolve(new Uint8Array(salt)):reject(new Error('No install salt committed'));
+      tx.onerror=()=>reject(tx.error??new Error('Install salt transaction failed'));
+      tx.onabort=()=>reject(tx.error??new Error('Stored install salt invalid or transaction aborted'));
+    });
+  }
+
   async get(store: string, key: string): Promise<any> {
     if (this.db) {
       return new Promise((resolve, reject) => {

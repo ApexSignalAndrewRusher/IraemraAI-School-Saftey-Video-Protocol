@@ -1,5 +1,5 @@
 // rosettastone.ts - Crypto Bridge + Hashing (Final Hardened)
-import { PersistentStore } from './persistence';
+import type { PersistentStore } from './persistence.ts';
 
 type Hash32 = Uint8Array;
 export type PublicKey = Uint8Array;

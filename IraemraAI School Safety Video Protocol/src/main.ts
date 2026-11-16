@@ -1,5 +1,5 @@
-import { IraemraProtocol } from './iraemra';
-import { equalDemoBytes } from './replay';
+import { IraemraProtocol } from './iraemra.ts';
+import { equalDemoBytes } from './replay.ts';
 
 const log = document.getElementById('log');
 const btn = document.getElementById('demo-btn') as HTMLButtonElement | null;

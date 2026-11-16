@@ -37,3 +37,10 @@ The following adaptation uses methods rather than importing unrelated software:
 - **No security inference:** SHA-256 repeatability demonstrates that the same bytes produce the same hash on the tested implementation; it does not authenticate sources, sign records, verify evidence, implement actual emergency handling or provide immutable custody.
 
 The previous demo still has no production safety authorization. The new Replay button retains a transient in-memory nonce and digest only; no local storage or external service is used for replay.
+
+## Review follow-up: atomic identity and runtime gates
+
+- Install salt initialization now uses a single IndexedDB **readwrite** transaction on the `system` store for the read/conditional insert, so simultaneous tabs share the committed salt. The previous read-then-write calls could race and cache distinct salts.
+- No `localStorage` fallback is permitted for the cryptographic salt because atomic get-or-create cannot be guaranteed there. The demo fails closed with a visible error when IndexedDB is unavailable.
+- `IraemraProtocol.init()` coalesces simultaneous calls and starts its monitor only once. After a failed attempt, initialization can be retried.
+- Runtime regression tests exercise the actual override refusal, real SHA-256 output on a simulated nonce, concurrent salt initialization with an in-memory serialized IndexedDB transaction mock, and rejection of absent transactional storage. These test only byte-level functionality and fail-closed behaviour; they do **not** validate real emergency response or source authentication.

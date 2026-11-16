@@ -1,8 +1,8 @@
 // Browser-only demonstration, NOT an emergency response or evidence system.
-import { PersistentStore } from './persistence';
-import { OverrideValidator } from './validator';
-import { ComplianceMonitor } from './compliance';
-import { digestDemoNonce } from './replay';
+import { PersistentStore } from './persistence.ts';
+import { OverrideValidator } from './validator.ts';
+import { ComplianceMonitor } from './compliance.ts';
+import { digestDemoNonce } from './replay.ts';
 
 export type DemoEPO = { demo_nonce: Uint8Array };
 export type DemoPIR = { demo_digest: Uint8Array };
